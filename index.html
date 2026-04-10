@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamLine | Watch Movies & TV</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo">🟡</div>
+        <nav class="side-nav">
+            <i class="ph ph-house" onclick="loadTrending()"></i>
+            <i class="ph ph-television"></i>
+            <i class="ph ph-movie-camera"></i>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-nav">
+            <div class="search-bar">
+                <i class="ph ph-magnifying-glass"></i>
+                <input type="text" id="searchInput" placeholder="Search movies or TV shows..." onkeyup="searchMedia()">
+            </div>
+            <div class="user-profile">
+                <div class="avatar">R</div>
+            </div>
+        </header>
+
+        <section class="hero" id="hero">
+            <div class="hero-content">
+                <h1 id="heroTitle">Loading...</h1>
+                <p id="heroDesc">Featured Content</p>
+                <button class="btn-play" id="heroPlayBtn">
+                    <i class="ph ph-play-fill"></i> Watch Now
+                </button>
+            </div>
+        </section>
+
+        <div class="content-row">
+            <div class="left-col">
+                <h3 id="gridHeader">Trending Now</h3>
+                <div class="movie-grid" id="movieGrid"></div>
+            </div>
+            
+            <aside class="right-col">
+                <h3>Top #10 Boxoffice</h3>
+                <div class="top-list" id="topList"></div>
+            </aside>
+        </div>
+    </main>
+
+    <div id="videoOverlay" class="video-overlay">
+        <div class="player-header">
+            <button class="close-video" onclick="closePlayer()">✕ Close Player</button>
+        </div>
+        
+        <div class="player-body">
+            <iframe id="videoPlayer" src="" frameborder="0" allowfullscreen></iframe>
+        </div>
+
+        <div id="controlsContainer" class="controls-container">
+            <div class="selector-group">
+                <label>Season:</label>
+                <select id="seasonSelect" onchange="loadEpisodes()"></select>
+            </div>
+            <div id="episodeGrid" class="episode-grid"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
