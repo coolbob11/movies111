@@ -1,5 +1,7 @@
 const API_KEY = '6fd8b10fcdc6cce151cbe651716a0620';
 let activeImdbId = '';
+let activeTmdbId = '';
+let activeType = '';
 
 window.onload = loadTrending;
 
@@ -38,7 +40,7 @@ function displayGrid(items) {
 function displayTopTen(items) {
     const topList = document.getElementById('topList');
     topList.innerHTML = items.map((item, i) => `
-        <div style="display:flex; gap:15px; margin-bottom:15px; cursor:pointer;" onclick="openPlayer(${item.id}, '${item.media_type}')">
+        <div style="display:flex; gap:15px; margin-bottom:15px; cursor:pointer;" onclick="openPlayer(${item.id}, '${item.media_type || 'movie'}')">
             <span style="font-size:1.5rem; font-weight:bold; color:#444;">${i+1}</span>
             <img src="https://image.tmdb.org/t/p/w92${item.poster_path}" style="width:45px; border-radius:4px;">
             <p style="font-size:0.8rem; margin:0;">${item.title || item.name}</p>
@@ -55,30 +57,34 @@ function setHero(item) {
 
 // 3. Player Logic
 async function openPlayer(tmdbId, type) {
-    const idRes = await fetch(`https://api.themoviedb.org/3/${type}/${tmdbId}/external_ids?api_key=${API_KEY}`);
-    const ids = await idRes.json();
-    activeImdbId = ids.imdb_id;
-
-    if (!activeImdbId) return alert("No IMDb ID found for this title.");
+    activeTmdbId = tmdbId;
+    activeType = type;
 
     const controls = document.getElementById('controlsContainer');
-    if (type === 'tv' || type === 'show') {
+
+    if (type === 'tv') {
         controls.style.display = 'block';
+        // For TV, use TMDB ID directly — no IMDb ID needed
         const tvRes = await fetch(`https://api.themoviedb.org/3/tv/${tmdbId}?api_key=${API_KEY}`);
         const tvData = await tvRes.json();
         setupSeasons(tvData.number_of_seasons, tmdbId);
-        changeSource(1, 1);
+        loadEpisodeAndPlay(tmdbId, 1, 1);
     } else {
         controls.style.display = 'none';
-        changeSource();
+        // For movies, use TMDB ID directly
+        const p = document.getElementById('videoPlayer');
+        p.src = `https://vidsrcme.ru/embed/movie/${tmdbId}`;
     }
+
     document.getElementById('videoOverlay').style.display = 'block';
 }
 
 function setupSeasons(count, tmdbId) {
     const select = document.getElementById('seasonSelect');
     select.innerHTML = '';
-    for(let i=1; i<=count; i++) select.innerHTML += `<option value="${i}">Season ${i}</option>`;
+    for (let i = 1; i <= count; i++) {
+        select.innerHTML += `<option value="${i}">Season ${i}</option>`;
+    }
     select.dataset.tmdbId = tmdbId;
     loadEpisodes();
 }
@@ -88,16 +94,16 @@ async function loadEpisodes() {
     const s = document.getElementById('seasonSelect').value;
     const res = await fetch(`https://api.themoviedb.org/3/tv/${tmdbId}/season/${s}?api_key=${API_KEY}`);
     const data = await res.json();
-    
+
     const grid = document.getElementById('episodeGrid');
     grid.innerHTML = data.episodes.map(ep => `
-        <button class="ep-btn" onclick="changeSource(${s}, ${ep.episode_number})">Ep ${ep.episode_number}</button>
+        <button class="ep-btn" onclick="loadEpisodeAndPlay(${tmdbId}, ${s}, ${ep.episode_number})">Ep ${ep.episode_number}</button>
     `).join('');
 }
 
-function changeSource(s=null, e=null) {
+function loadEpisodeAndPlay(tmdbId, season, episode) {
     const p = document.getElementById('videoPlayer');
-    p.src = s ? `https://vidsrc.cc/v2/embed/tv/${activeImdbId}/${s}/${e}` : `https://vidsrc.cc/v2/embed/movie/${activeImdbId}`;
+    p.src = `https://vidsrcme.ru/embed/tv/${tmdbId}/${season}/${episode}`;
 }
 
 function closePlayer() {
