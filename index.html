@@ -1,75 +1,114 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StreamLine | Watch Movies & TV</title>
-    <link rel="stylesheet" href="style.css">
+    <title>DUSK — Watch Free</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <aside class="sidebar">
-        <div class="logo">🟡</div>
-        <nav class="side-nav">
-            <i class="ph ph-house" onclick="loadTrending()"></i>
-            <i class="ph ph-television"></i>
-            <i class="ph ph-movie-camera"></i>
-        </nav>
-    </aside>
-
-    <main class="main-content">
-        <header class="top-nav">
-            <div class="search-bar">
-                <i class="ph ph-magnifying-glass"></i>
-                <input type="text" id="searchInput" placeholder="Search movies or TV shows..." onkeyup="searchMedia()">
-            </div>
-            <div class="user-profile">
-                <div class="avatar">R</div>
-            </div>
-        </header>
-
-        <section class="hero" id="hero">
-            <div class="hero-content">
-                <h1 id="heroTitle">Loading...</h1>
-                <p id="heroDesc">Featured Content</p>
-                <button class="btn-play" id="heroPlayBtn">
-                    <i class="ph ph-play-fill"></i> Watch Now
-                </button>
-            </div>
-        </section>
-
-        <div class="content-row">
-            <div class="left-col">
-                <h3 id="gridHeader">Trending Now</h3>
-                <div class="movie-grid" id="movieGrid"></div>
-            </div>
-            
-            <aside class="right-col">
-                <h3>Top #10 Boxoffice</h3>
-                <div class="top-list" id="topList"></div>
-            </aside>
+<!-- NAV -->
+<nav class="navbar">
+    <div class="nav-logo" onclick="loadTrending()">DUSK</div>
+    <div class="nav-links">
+        <span class="nav-link active" onclick="loadTrending()">Home</span>
+        <span class="nav-link" onclick="filterByType('movie')">Movies</span>
+        <span class="nav-link" onclick="filterByType('tv')">TV Shows</span>
+    </div>
+    <div class="nav-right">
+        <div class="search-wrap">
+            <i class="ph ph-magnifying-glass"></i>
+            <input type="text" id="searchInput" placeholder="Search..." onkeyup="searchMedia()">
         </div>
-    </main>
+        <div class="avatar">F</div>
+    </div>
+</nav>
 
-    <div id="videoOverlay" class="video-overlay">
-        <div class="player-header">
-            <button class="close-video" onclick="closePlayer()">✕ Close Player</button>
-        </div>
-        
-        <div class="player-body">
-            <iframe id="videoPlayer" src="" frameborder="0" allowfullscreen></iframe>
-        </div>
-
-        <div id="controlsContainer" class="controls-container">
-            <div class="selector-group">
-                <label>Season:</label>
-                <select id="seasonSelect" onchange="loadEpisodes()"></select>
+<!-- HOME PAGE -->
+<div id="homePage">
+    <!-- HERO -->
+    <section class="hero" id="hero">
+        <div class="hero-bg" id="heroBg"></div>
+        <div class="hero-gradient"></div>
+        <div class="hero-bottom-fade"></div>
+        <div class="hero-content">
+            <div class="hero-eyebrow" id="heroMeta">TRENDING</div>
+            <h1 class="hero-title" id="heroTitle">Loading...</h1>
+            <p class="hero-overview" id="heroOverview"></p>
+            <div class="hero-tags" id="heroTags"></div>
+            <div class="hero-actions">
+                <button class="btn-primary" id="heroPlayBtn"><i class="ph ph-play-fill"></i> Play Now</button>
+                <button class="btn-ghost" id="heroInfoBtn"><i class="ph ph-info"></i> More Info</button>
             </div>
-            <div id="episodeGrid" class="episode-grid"></div>
         </div>
+    </section>
+
+    <!-- TRENDING -->
+    <section class="shelf" id="trendingShelf">
+        <div class="shelf-header">
+            <h2 class="shelf-title" id="shelfTitle">Trending Now</h2>
+            <div class="shelf-nav">
+                <button class="shelf-btn" id="trendPrev"><i class="ph ph-caret-left"></i></button>
+                <button class="shelf-btn" id="trendNext"><i class="ph ph-caret-right"></i></button>
+            </div>
+        </div>
+        <div class="shelf-track" id="trendingTrack"></div>
+    </section>
+
+    <!-- TOP 10 -->
+    <section class="top10-section" id="top10Section">
+        <div class="shelf-header">
+            <h2 class="shelf-title">Top 10 Today</h2>
+        </div>
+        <div class="top10-grid" id="top10Grid"></div>
+    </section>
+
+    <!-- SEARCH RESULTS -->
+    <section class="search-section" id="searchSection">
+        <div class="shelf-header">
+            <h2 class="shelf-title" id="searchLabel">Results</h2>
+        </div>
+        <div class="search-grid" id="searchGrid"></div>
+    </section>
+</div>
+
+<!-- PLAYER PAGE (full page, scrollable) -->
+<div class="player-page" id="playerPage">
+    <div class="player-topbar">
+        <div class="player-topbar-left">
+            <span class="player-show-title" id="playerShowTitle">Now Playing</span>
+            <span class="player-ep-label" id="playerEpLabel"></span>
+        </div>
+        <button class="player-close" onclick="closePlayer()"><i class="ph ph-x"></i></button>
     </div>
 
-    <script src="script.js"></script>
+    <!-- VIDEO -->
+    <div class="player-screen" id="playerScreen">
+        <iframe id="videoPlayer" src="" allowfullscreen allow="autoplay; fullscreen; picture-in-picture" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"></iframe>
+        <button class="player-fullscreen-btn" onclick="goFullscreen()"><i class="ph ph-arrows-out"></i> Fullscreen</button>
+    </div>
+
+    <!-- TV CONTROLS -->
+    <div class="tv-controls" id="tvControls">
+        <div class="season-bar">
+            <span class="season-label">Season</span>
+            <div class="season-tabs" id="seasonTabs"></div>
+        </div>
+        <div class="episodes-panel" id="episodesPanel"></div>
+    </div>
+</div>
+
+<!-- MOBILE NAV -->
+<nav class="mobile-nav">
+    <div class="mob-btn active" onclick="loadTrending()"><i class="ph ph-house-fill"></i><span>Home</span></div>
+    <div class="mob-btn" onclick="filterByType('movie')"><i class="ph ph-film-strip"></i><span>Movies</span></div>
+    <div class="mob-btn" onclick="filterByType('tv')"><i class="ph ph-television"></i><span>Shows</span></div>
+    <div class="mob-btn" onclick="document.getElementById('searchInput').focus()"><i class="ph ph-magnifying-glass"></i><span>Search</span></div>
+</nav>
+
+<script src="script.js"></script>
 </body>
 </html>
