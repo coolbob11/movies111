@@ -4,6 +4,14 @@ let activeTmdbId = null;
 let activeType = null;
 let activeSeason = 1;
 let activeEpisode = 1;
+let activeSource = 0;
+
+const SOURCES = [
+    { name: 'VidLink',  movie: id      => `https://vidlink.pro/movie/${id}`,                 tv: (id,s,e) => `https://vidlink.pro/tv/${id}/${s}/${e}` },
+    { name: 'VidSrc',   movie: id      => `https://vidsrc.me/embed/movie?tmdb=${id}`,        tv: (id,s,e) => `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}` },
+    { name: '2Embed',   movie: id      => `https://www.2embed.stream/embed/movie/${id}`,     tv: (id,s,e) => `https://www.2embed.stream/embed/tv/${id}/${s}/${e}` },
+    { name: 'VidNest',  movie: id      => `https://vidnest.fun/movie/${id}`,                 tv: (id,s,e) => `https://vidnest.fun/tv/${id}/${s}/${e}` },
+];
 
 window.onload = loadTrending;
 
@@ -160,25 +168,47 @@ function showPlayer() {
     const pp = document.getElementById('playerPage');
     pp.classList.add('open');
     pp.scrollTop = 0;
-    document.body.style.overflow = 'hidden'; // player page handles its own scroll
+    document.body.style.overflow = 'hidden';
+}
+
+// ── SOURCE SWITCHER ──
+function renderSourceBtns() {
+    const bar = document.getElementById('sourceBtns');
+    bar.innerHTML = '';
+    SOURCES.forEach((src, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'source-btn' + (i === activeSource ? ' active' : '');
+        btn.innerText = src.name;
+        btn.onclick = () => switchSource(i);
+        bar.appendChild(btn);
+    });
+}
+
+function switchSource(i) {
+    activeSource = i;
+    renderSourceBtns();
+    if (activeType === 'tv') {
+        playEpisode(activeTmdbId, activeSeason, activeEpisode);
+    } else {
+        document.getElementById('videoPlayer').src = SOURCES[i].movie(activeTmdbId);
+    }
 }
 
 // ── OPEN PLAYER ──
 async function openPlayer(tmdbId, type) {
     activeTmdbId = tmdbId;
     activeType = type;
+    activeSource = 0;
 
     showPlayer();
+    renderSourceBtns();
 
-    // Title
     try {
         const detail = await api(`/${type}/${tmdbId}`);
         document.getElementById('playerShowTitle').innerText = detail.title || detail.name || 'Now Playing';
-        if (type === 'tv') {
-            document.getElementById('playerEpLabel').innerText = `Season 1 · Episode 1`;
-        } else {
-            document.getElementById('playerEpLabel').innerText = `Movie · ${(detail.release_date || '').slice(0, 4)}`;
-        }
+        document.getElementById('playerEpLabel').innerText = type === 'tv'
+            ? `Season 1 · Episode 1`
+            : `Movie · ${(detail.release_date || '').slice(0, 4)}`;
     } catch(e) {
         document.getElementById('playerShowTitle').innerText = 'Now Playing';
     }
@@ -191,7 +221,7 @@ async function openPlayer(tmdbId, type) {
         playEpisode(tmdbId, 1, 1);
     } else {
         document.getElementById('tvControls').style.display = 'none';
-        document.getElementById('videoPlayer').src = `https://vidnest.fun/movie/${tmdbId}`;
+        document.getElementById('videoPlayer').src = SOURCES[activeSource].movie(tmdbId);
     }
 }
 
@@ -249,7 +279,6 @@ async function loadEpisodes(tmdbId, season) {
 
         card.onclick = () => {
             playEpisode(tmdbId, season, ep.episode_number);
-            // scroll player screen into view
             document.getElementById('playerScreen').scrollIntoView({ behavior: 'smooth' });
         };
         panel.appendChild(card);
@@ -260,7 +289,7 @@ async function loadEpisodes(tmdbId, season) {
 function playEpisode(tmdbId, season, episode) {
     activeSeason = season;
     activeEpisode = episode;
-    document.getElementById('videoPlayer').src = `https://vidnest.fun/tv/${tmdbId}/${season}/${episode}`;
+    document.getElementById('videoPlayer').src = SOURCES[activeSource].tv(tmdbId, season, episode);
     document.getElementById('playerEpLabel').innerText = `Season ${season} · Episode ${episode}`;
 
     document.querySelectorAll('.ep-card').forEach(c => c.classList.remove('playing'));
@@ -285,7 +314,4 @@ function goFullscreen() {
     else if (iframe.mozRequestFullScreen) iframe.mozRequestFullScreen();
 }
 
-// ESC to close
-document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closePlayer();
-});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePlayer(); });
