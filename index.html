@@ -1,8 +1,9 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DUSK — Watch Free</title>
+    <title>FLUX — Watch Free</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -12,7 +13,7 @@
 
 <!-- NAV -->
 <nav class="navbar">
-    <div class="nav-logo" onclick="loadTrending()">DUSK</div>
+    <div class="nav-logo" onclick="loadTrending()">FLUX</div>
     <div class="nav-links">
         <span class="nav-link active" onclick="loadTrending()">Home</span>
         <span class="nav-link" onclick="filterByType('movie')">Movies</span>
@@ -87,7 +88,7 @@
 
     <!-- VIDEO -->
     <div class="player-screen" id="playerScreen">
-        <iframe id="videoPlayer" src="" allowfullscreen allow="autoplay; fullscreen; picture-in-picture" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"></iframe>
+        <iframe id="videoPlayer" src="" frameBorder="0" scrolling="no" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>
         <button class="player-fullscreen-btn" onclick="goFullscreen()"><i class="ph ph-arrows-out"></i> Fullscreen</button>
     </div>
 
