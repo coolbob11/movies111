@@ -191,7 +191,7 @@ async function openPlayer(tmdbId, type) {
         playEpisode(tmdbId, 1, 1);
     } else {
         document.getElementById('tvControls').style.display = 'none';
-        document.getElementById('videoPlayer').src = `https://vidsrcme.ru/embed/movie/${tmdbId}`;
+        document.getElementById('videoPlayer').src = `https://vidnest.fun/movie/${tmdbId}`;
     }
 }
 
@@ -260,7 +260,7 @@ async function loadEpisodes(tmdbId, season) {
 function playEpisode(tmdbId, season, episode) {
     activeSeason = season;
     activeEpisode = episode;
-    document.getElementById('videoPlayer').src = `https://vidsrcme.ru/embed/tv/${tmdbId}/${season}/${episode}`;
+    document.getElementById('videoPlayer').src = `https://vidnest.fun/tv/${tmdbId}/${season}/${episode}`;
     document.getElementById('playerEpLabel').innerText = `Season ${season} · Episode ${episode}`;
 
     document.querySelectorAll('.ep-card').forEach(c => c.classList.remove('playing'));
