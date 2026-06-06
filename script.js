@@ -4,16 +4,20 @@ let activeTmdbId = null;
 let activeType = null;
 let activeSeason = 1;
 let activeEpisode = 1;
-let activeSource = 0;
 
+// Multi-source configuration
 const SOURCES = [
-    { name: 'VidLink',  movie: id      => `https://vidlink.pro/movie/${id}`,                 tv: (id,s,e) => `https://vidlink.pro/tv/${id}/${s}/${e}` },
-    { name: 'VidSrc',   movie: id      => `https://vidsrc.me/embed/movie?tmdb=${id}`,        tv: (id,s,e) => `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}` },
-    { name: '2Embed',   movie: id      => `https://www.2embed.stream/embed/movie/${id}`,     tv: (id,s,e) => `https://www.2embed.stream/embed/tv/${id}/${s}/${e}` },
-    { name: 'VidNest',  movie: id      => `https://vidnest.fun/movie/${id}`,                 tv: (id,s,e) => `https://vidnest.fun/tv/${id}/${s}/${e}` },
+    { name: 'VidSrc', id: 'vidsrc' },
+    { name: 'VidLink', id: 'vidlink' },
+    { name: '2Embed', id: 'embed2' },
+    { name: 'VidNest', id: 'vidnest' }
 ];
+let activeSource = 'vidsrc';
 
-window.onload = loadTrending;
+window.onload = () => {
+    loadTrending();
+    initSourceSwitcher();
+};
 
 // ── API ──
 async function api(path) {
@@ -31,7 +35,6 @@ async function loadTrending() {
     document.getElementById('top10Section').style.display = 'block';
     document.getElementById('searchSection').style.display = 'none';
     document.getElementById('shelfTitle').innerText = 'Trending Now';
-
     const data = await apiQ('/trending/all/day', '');
     const results = data.results.filter(r => r.poster_path && r.backdrop_path);
 
@@ -49,7 +52,6 @@ async function filterByType(type) {
     showHome();
     document.getElementById('top10Section').style.display = 'none';
     document.getElementById('searchSection').style.display = 'none';
-
     const label = type === 'movie' ? 'Trending Movies' : 'Trending TV Shows';
     document.getElementById('shelfTitle').innerText = label;
 
@@ -62,10 +64,17 @@ async function filterByType(type) {
 }
 
 // ── SEARCH ──
-async function searchMedia() {
-    const query = document.getElementById('searchInput').value.trim();
-    if (query.length < 2) { loadTrending(); return; }
+async function searchMedia(inputElId) {
+    const query = document.getElementById(inputElId).value.trim();
+    
+    // Mirror content across desktop and mobile inputs to keep UX clean
+    if (inputElId === 'searchInput') {
+        document.getElementById('mobileSearchInput').value = query;
+    } else {
+        document.getElementById('searchInput').value = query;
+    }
 
+    if (query.length < 2) { loadTrending(); return; }
     showHome();
     document.getElementById('trendingShelf').style.display = 'none';
     document.getElementById('top10Section').style.display = 'none';
@@ -80,6 +89,16 @@ async function searchMedia() {
     results.forEach(item => grid.appendChild(makeCard(item)));
 }
 
+function toggleMobileSearch() {
+    const searchBar = document.getElementById('mobSearchBar');
+    if (searchBar.classList.contains('open')) {
+        searchBar.classList.remove('open');
+    } else {
+        searchBar.classList.add('open');
+        document.getElementById('mobileSearchInput').focus();
+    }
+}
+
 // ── HERO ──
 async function setHero(item) {
     document.getElementById('heroBg').style.backgroundImage = `url(${IMG}original${item.backdrop_path})`;
@@ -87,7 +106,6 @@ async function setHero(item) {
     document.getElementById('heroOverview').innerText = item.overview
         ? item.overview.slice(0, 150) + (item.overview.length > 150 ? '…' : '')
         : '';
-
     const type = item.media_type || 'movie';
     try {
         const detail = await api(`/${type}/${item.id}`);
@@ -171,44 +189,20 @@ function showPlayer() {
     document.body.style.overflow = 'hidden';
 }
 
-// ── SOURCE SWITCHER ──
-function renderSourceBtns() {
-    const bar = document.getElementById('sourceBtns');
-    bar.innerHTML = '';
-    SOURCES.forEach((src, i) => {
-        const btn = document.createElement('button');
-        btn.className = 'source-btn' + (i === activeSource ? ' active' : '');
-        btn.innerText = src.name;
-        btn.onclick = () => switchSource(i);
-        bar.appendChild(btn);
-    });
-}
-
-function switchSource(i) {
-    activeSource = i;
-    renderSourceBtns();
-    if (activeType === 'tv') {
-        playEpisode(activeTmdbId, activeSeason, activeEpisode);
-    } else {
-        document.getElementById('videoPlayer').src = SOURCES[i].movie(activeTmdbId);
-    }
-}
-
 // ── OPEN PLAYER ──
 async function openPlayer(tmdbId, type) {
     activeTmdbId = tmdbId;
     activeType = type;
-    activeSource = 0;
-
     showPlayer();
-    renderSourceBtns();
 
     try {
         const detail = await api(`/${type}/${tmdbId}`);
         document.getElementById('playerShowTitle').innerText = detail.title || detail.name || 'Now Playing';
-        document.getElementById('playerEpLabel').innerText = type === 'tv'
-            ? `Season 1 · Episode 1`
-            : `Movie · ${(detail.release_date || '').slice(0, 4)}`;
+        if (type === 'tv') {
+            document.getElementById('playerEpLabel').innerText = `Season 1 · Episode 1`;
+        } else {
+            document.getElementById('playerEpLabel').innerText = `Movie · ${(detail.release_date || '').slice(0, 4)}`;
+        }
     } catch(e) {
         document.getElementById('playerShowTitle').innerText = 'Now Playing';
     }
@@ -221,8 +215,54 @@ async function openPlayer(tmdbId, type) {
         playEpisode(tmdbId, 1, 1);
     } else {
         document.getElementById('tvControls').style.display = 'none';
-        document.getElementById('videoPlayer').src = SOURCES[activeSource].movie(tmdbId);
+        updateVideoSrc();
     }
+}
+
+// ── MULTI-SOURCE SWITCHER LOGIC ──
+function initSourceSwitcher() {
+    const container = document.getElementById('sourceBtns');
+    container.innerHTML = '';
+    SOURCES.forEach(src => {
+        const btn = document.createElement('button');
+        btn.className = 'source-btn' + (src.id === activeSource ? ' active' : '');
+        btn.innerText = src.name;
+        btn.onclick = () => selectSource(src.id);
+        container.appendChild(btn);
+    });
+}
+
+function selectSource(sourceId) {
+    activeSource = sourceId;
+    document.querySelectorAll('.source-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.innerText.toLowerCase().includes(sourceId.replace('embed2', '2embed')));
+    });
+    // Re-render tabs with correct active indicator
+    initSourceSwitcher();
+    updateVideoSrc();
+}
+
+function updateVideoSrc() {
+    if (!activeTmdbId) return;
+    const iframe = document.getElementById('videoPlayer');
+    let url = '';
+
+    if (activeType === 'movie') {
+        switch(activeSource) {
+            case 'vidsrc': url = `https://vidsrcme.ru/embed/tv/${activeTmdbId}/${activeSeason}/${activeEpisode}`; break;
+            case 'vidlink': url = `https://vidlink.pro/movie/${activeTmdbId}`; break;
+            case 'embed2': url = `https://www.2embed.stream/embed/movie/${activeTmdbId}`; break;
+            case 'vidnest': url = `https://vidnest.fun/embed/movie/${activeTmdbId}`; break;
+        }
+    } else {
+        switch(activeSource) {
+            case 'vidsrc': url = `https://vidsrcme.ru/embed/tv/${activeTmdbId}/${activeSeason}/${activeEpisode}`; break;
+            case 'vidlink': url = `https://vidlink.pro/tv/${activeTmdbId}/${activeSeason}/${activeEpisode}`; break;
+            case 'embed2': url = `https://www.2embed.stream/embed/tv/${activeTmdbId}/${activeSeason}/${activeEpisode}`; break;
+            case 'vidnest': url = `https://vidnest.fun/embed/tv/${activeTmdbId}/${activeSeason}/${activeEpisode}`; break;
+        }
+    }
+    iframe.src = url;
 }
 
 // ── SEASONS ──
@@ -252,7 +292,6 @@ async function loadEpisodes(tmdbId, season) {
     const data = await api(`/tv/${tmdbId}/season/${season}`);
     const panel = document.getElementById('episodesPanel');
     panel.innerHTML = '';
-
     data.episodes.forEach(ep => {
         const isPlaying = activeSeason === season && activeEpisode === ep.episode_number;
         const card = document.createElement('div');
@@ -289,9 +328,8 @@ async function loadEpisodes(tmdbId, season) {
 function playEpisode(tmdbId, season, episode) {
     activeSeason = season;
     activeEpisode = episode;
-    document.getElementById('videoPlayer').src = SOURCES[activeSource].tv(tmdbId, season, episode);
+    updateVideoSrc();
     document.getElementById('playerEpLabel').innerText = `Season ${season} · Episode ${episode}`;
-
     document.querySelectorAll('.ep-card').forEach(c => c.classList.remove('playing'));
     const active = document.getElementById(`ep-${season}-${episode}`);
     if (active) {
@@ -314,4 +352,6 @@ function goFullscreen() {
     else if (iframe.mozRequestFullScreen) iframe.mozRequestFullScreen();
 }
 
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closePlayer(); });
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closePlayer();
+});
