@@ -11,7 +11,6 @@
 </head>
 <body>
 
-<!-- NAV -->
 <nav class="navbar">
     <div class="nav-logo" onclick="loadTrending()">FLUX</div>
     <div class="nav-links">
@@ -22,15 +21,20 @@
     <div class="nav-right">
         <div class="search-wrap">
             <i class="ph ph-magnifying-glass"></i>
-            <input type="text" id="searchInput" placeholder="Search..." onkeyup="searchMedia()">
+            <input type="text" id="searchInput" placeholder="Search..." onkeyup="searchMedia('searchInput')">
         </div>
         <div class="avatar">F</div>
     </div>
 </nav>
 
-<!-- HOME PAGE -->
+<div class="mobile-search-bar" id="mobSearchBar">
+    <div class="mob-search-wrap">
+        <i class="ph ph-magnifying-glass"></i>
+        <input type="text" id="mobileSearchInput" placeholder="Type to search movies & shows..." onkeyup="searchMedia('mobileSearchInput')">
+    </div>
+</div>
+
 <div id="homePage">
-    <!-- HERO -->
     <section class="hero" id="hero">
         <div class="hero-bg" id="heroBg"></div>
         <div class="hero-gradient"></div>
@@ -47,7 +51,6 @@
         </div>
     </section>
 
-    <!-- TRENDING -->
     <section class="shelf" id="trendingShelf">
         <div class="shelf-header">
             <h2 class="shelf-title" id="shelfTitle">Trending Now</h2>
@@ -59,7 +62,6 @@
         <div class="shelf-track" id="trendingTrack"></div>
     </section>
 
-    <!-- TOP 10 -->
     <section class="top10-section" id="top10Section">
         <div class="shelf-header">
             <h2 class="shelf-title">Top 10 Today</h2>
@@ -67,7 +69,6 @@
         <div class="top10-grid" id="top10Grid"></div>
     </section>
 
-    <!-- SEARCH RESULTS -->
     <section class="search-section" id="searchSection">
         <div class="shelf-header">
             <h2 class="shelf-title" id="searchLabel">Results</h2>
@@ -76,7 +77,6 @@
     </section>
 </div>
 
-<!-- PLAYER PAGE (full page, scrollable) -->
 <div class="player-page" id="playerPage">
     <div class="player-topbar">
         <div class="player-topbar-left">
@@ -86,20 +86,17 @@
         <button class="player-close" onclick="closePlayer()"><i class="ph ph-x"></i></button>
     </div>
 
-    <!-- SOURCE SWITCHER -->
     <div class="source-bar">
         <span class="source-label">SOURCE</span>
         <div class="source-btns" id="sourceBtns"></div>
         <span class="source-tip">Try another if video won't load</span>
     </div>
 
-    <!-- VIDEO -->
     <div class="player-screen" id="playerScreen">
         <iframe id="videoPlayer" src="" frameBorder="0" scrolling="no" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>
         <button class="player-fullscreen-btn" onclick="goFullscreen()"><i class="ph ph-arrows-out"></i> Fullscreen</button>
     </div>
 
-    <!-- TV CONTROLS -->
     <div class="tv-controls" id="tvControls">
         <div class="season-bar">
             <span class="season-label">Season</span>
@@ -109,12 +106,11 @@
     </div>
 </div>
 
-<!-- MOBILE NAV -->
 <nav class="mobile-nav">
     <div class="mob-btn active" onclick="loadTrending()"><i class="ph ph-house-fill"></i><span>Home</span></div>
     <div class="mob-btn" onclick="filterByType('movie')"><i class="ph ph-film-strip"></i><span>Movies</span></div>
     <div class="mob-btn" onclick="filterByType('tv')"><i class="ph ph-television"></i><span>Shows</span></div>
-    <div class="mob-btn" onclick="document.getElementById('searchInput').focus()"><i class="ph ph-magnifying-glass"></i><span>Search</span></div>
+    <div class="mob-btn" onclick="toggleMobileSearch()"><i class="ph ph-magnifying-glass"></i><span>Search</span></div>
 </nav>
 
 <script src="script.js"></script>
