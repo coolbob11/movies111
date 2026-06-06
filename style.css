@@ -412,6 +412,57 @@ body {
     gap: 14px;
 }
 
+/* ── SOURCE BAR ── */
+.source-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 24px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.source-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--muted);
+    flex-shrink: 0;
+}
+
+.source-btns { display: flex; gap: 6px; }
+
+.source-btn {
+    padding: 4px 14px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+.source-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+.source-btn.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 600; }
+
+.source-tip {
+    font-size: 11px;
+    color: var(--muted);
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+/* ── SOURCE BAR RESPONSIVE ── */
+@media (max-width: 560px) {
+    .source-tip { display: none; }
+    .source-bar { padding: 8px 16px; }
+}
+
 /* ── PLAYER PAGE ── */
 /* Player replaces entire viewport, scrollable */
 .player-page {
